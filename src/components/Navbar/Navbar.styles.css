@@ -67,10 +67,11 @@ nav {
     color: #a2a2a1;
     text-decoration: none;
     margin: 0 1rem;
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 500;
+    padding: .6rem;
 }
-.mobileLinks a:active{
+.mobileLinks a:focus{
     color: #1976d2;
     background: transparent;
 }
