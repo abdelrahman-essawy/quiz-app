@@ -1,16 +1,31 @@
 import React from 'react'
-import Input from '../components/form/Input'
-import PrimaryButton from '../components/form/PrimaryButton'
+import Input from '../components/Form/Input'
+import PrimaryButton from '../components/Form/PrimaryButton'
 import { useForm } from "react-hook-form";
 import '../styles/Register.style.css'
-
-
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { auth } from "../firebase"
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function Register() {
+  const navigate = useNavigate()
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
-  const onSubmit = (data) => {
-    console.log(data)
+  const [registertionErrMsg, setregistertionErrMsg] = useState()
 
+  const onSubmit = async ({ email, password, firstName }) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then(async (result) => {
+          await updateProfile(auth.currentUser, {
+            displayName: firstName,
+          })
+        })
+      navigate('/signin')
+    }
+    catch (error) {
+      setregistertionErrMsg(error.message)
+    }
   }
 
   const registerOptions = {
@@ -36,7 +51,7 @@ export default function Register() {
 
   return (
     <section className='Register-Wrapper'>
-      <div className='Register'>
+          <div className='Register'>
         <h1>Register</h1>
 
         <form className='form' onSubmit={handleSubmit(onSubmit)}>
@@ -50,12 +65,13 @@ export default function Register() {
           {errors?.password && errors.password.message}
           <Input label={"Confirm Password"} type={'password'} props={{ ...register('confirmPassword', registerOptions.confirmPassword) }} placeholder={"Re-type Your Password"} />
           {errors?.confirmPassword && errors.confirmPassword.message}
+          {registertionErrMsg === 'Firebase: Error (auth/email-already-in-use).' ? 'Email already exists' : registertionErrMsg}
           <PrimaryButton content={'Register'} />
         </form>
       </div>
       <div>
         <img src={'/lamp.png'} alt={'logo'} />
       </div>
-    </section >
+    </section>
   )
 }

@@ -1,27 +1,48 @@
 import React from 'react'
-import PrimaryButton from '../components/form/PrimaryButton'
-import Input from '../components/form/Input';
+import PrimaryButton from '../components/Form/PrimaryButton'
+import Input from '../components/Form/Input';
 import { useForm } from "react-hook-form";
 import '../styles/Signin.style.css'
+import { signInWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../firebase"
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveUser } from '../features/users/userSlice';
 
 export default function Signin() {
 
+    const navigate = useNavigate()
+    const user = useSelector(store => store.user)
+    const dispatch = useDispatch()
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const onSubmit = (data) => {
-        console.log(data)
+    const [loginErrMsg, setLoginErrMsg] = useState()
 
+    const onSubmit = async ({ email, password }) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password)
+                .then(activeUser => {
+                    const { displayName, email, accessToken } = activeUser.user
+                    dispatch(
+                        setActiveUser(
+                            { displayName, email, accessToken }
+                        )
+                    )
+                    localStorage.setItem('quizzAppAccessToken', accessToken)
+                })
+            navigate('/start')
+        } catch (error) {
+            setLoginErrMsg(error.message)
+        }
     }
 
     const registerOptions = {
         email: { required: "Email is required" },
         password: {
             required: "Password is required",
-            minLength: {
-                value: 8,
-                message: "Password must have at least 8 characters"
-            }
         },
     };
+    console.log(user)
 
     return (
         <section className='Signin-Wrapper'>
@@ -35,6 +56,7 @@ export default function Signin() {
                     <Input label={"Password"} type={'password'} props={{ ...register('password', registerOptions.password) }} />
                     {errors?.password && errors.password.message}
 
+                    {loginErrMsg ? "Wrong Password" : null}
                     <PrimaryButton content={'Sign in'} />
                 </form>
             </div>

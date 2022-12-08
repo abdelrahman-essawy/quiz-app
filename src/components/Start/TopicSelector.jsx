@@ -2,10 +2,14 @@ import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import './Selector.styles.css'
+import { useDispatch } from 'react-redux';
+import { setActiveUser } from '../../features/users/userSlice';
 
-export default function Begin() {
+export default function Start() {
+
     const [categories, setCategories] = useState([]);
-    const [category, setCategory] = useState("");
+    const [topic, setTopic] = useState(null);
+    const dispatch = useDispatch()
 
     const getCategories = async () => {
         await fetch('https://opentdb.com/api_category.php')
@@ -17,11 +21,14 @@ export default function Begin() {
         getCategories()
     }, []);
 
-    console.log(category)
+
     return (
         <div>
-            <select className='Selector' value={category} onChange={(e) => setCategory(e.target.value)} >
-                <option value={null}>Topic</option>
+            <select className='Selector' value={topic}
+                onChange={(e) =>
+                    dispatch(setActiveUser({topic:e.target.value}))} 
+                    required>
+                <option value={''}>Topic</option>
                 {
                     categories.map(({ name, id }) => {
                         return (

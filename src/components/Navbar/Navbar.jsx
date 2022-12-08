@@ -1,12 +1,25 @@
 import React, { useState } from 'react'
 import './Navbar.styles.css'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { setSignOutState } from '../../features/users/userSlice';
+import { useEffect } from 'react';
+import { clearQuestions } from '../../features/questions/questionsSlice';
 
 export default function Navbar() {
   const [expandNavbar, setExpandNavbar] = useState(false)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const { displayName, accessToken } = useSelector(state => state.user)
 
   const handleNavbarClick = () => {
     setExpandNavbar(!expandNavbar)
+  }
+  const handleLogout = () => {
+    dispatch(setSignOutState())
+    dispatch(clearQuestions())
+    navigate('/')
   }
 
   return (
@@ -19,8 +32,19 @@ export default function Navbar() {
           </Link>
         </div>
         <div className='links'>
-          <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'signin'}>Sign in</NavLink>
-          <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'register'}>Register</NavLink>
+          {
+            accessToken ? (
+              <>
+                Hello {displayName}
+                <NavLink onClick={handleLogout} style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={''}>Logout</NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'/signin'}>Sign in</NavLink>
+                <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'/register'}>Register</NavLink>
+              </>
+            )
+          }
         </div>
         <button
           className="hamburger"
@@ -39,8 +63,16 @@ export default function Navbar() {
         <hr />
 
         <div className='mobileLinks'>
-          <Link onClick={handleNavbarClick} to={'signin'}>Sign in</Link>
-          <Link onClick={handleNavbarClick} to={'register'}>Register</Link>
+{            accessToken ? (
+              <>
+                <NavLink onClick={handleLogout} style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={''}>Logout</NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'/signin'}>Sign in</NavLink>
+                <NavLink style={({ isActive }) => { return { color: isActive ? '#fff' : '' } }} to={'/register'}>Register</NavLink>
+              </>
+            )}
         </div>
 
       </div>
